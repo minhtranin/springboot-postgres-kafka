@@ -1,0 +1,58 @@
+version: '3'
+services:
+  postgres-db:
+    image: postgres:10
+    container_name: postgres-container
+    ports:
+      - '5434:5432'
+    # volumes:
+    #   - './app-db/init-app-db.sh:/docker-entrypoint-initdb.d/init-app-db.sh'
+    #   - './app-db/init-script:/docker-entrypoint-initdb.d/init-script'
+    #   - '../database:/database'
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+  # caching-service:
+  #   image: redis
+  #   container_name: redis-container
+  #   ports:
+  #     - '6379:6379'
+  #   environment:
+  #     - ALLOW_EMPTY_PASSWORD=yes
+  spring-service:
+    build: .
+    container_name: spring-container
+    env_file: .env
+    ports:
+      - '7000:8080'
+    depends_on:
+      - postgres-db
+
+  # gateway:
+  #   build:
+  #     context: ./gateway
+  #   image: gateway-image
+  #   container_name: gateway-container
+  #   ports:
+  #     - '8000:8000'
+  #   volumes:
+  #     - './gateway/healthcare-web.conf:/etc/nginx/conf.d/healthcare-web.conf'
+  #     - './gateway/log:/var/log/nginx'
+  #   links:
+  #     - product-service
+  #     - policy-service
+  #     - user-service
+  #     - ext-user-service
+  #     - auth-service
+  #     - claim-service
+  #     - integration-service
+  #   depends_on:
+  #     - healthcare-web
+  #   command:
+  #     - /wait-for-it.sh
+  #     - 'healthcare-web:80'
+  #     - '--'
+  #     - nginx
+  #     - '-g'
+  #     - daemon off;
